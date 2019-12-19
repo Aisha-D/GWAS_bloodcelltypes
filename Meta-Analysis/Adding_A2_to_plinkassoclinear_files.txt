@@ -1,0 +1,77 @@
+## This bash script is to add A2(major allele) to plink output files 
+## as it will be required in the METAL meta analysis
+
+
+awk 'NR==FNR{a[$1]=$2; next}{$1=a[$1]; print}' file2 file1
+
+
+Explanation
+NR==FNR : NR is the current line number, FNR is the line number of the current file. 
+			The two will be identical only while the 1st file (here, file2) is being read.
+a[$1]=$2; next: if this is the first file (see above), save the 2nd field in an array whose key is the 1st field. 
+				Then, move on to the next line. This ensures the next block isn't executed for the 1st file.
+{$1=a[$1]; print} : now, in the second file, set the 1st field to whatever value was saved in the array a for the
+					1st field (so, the associated value from file2) and print the resulting line.
+					
+					
+					
+plink2 --bfile data_filtered_1_sex_upd --update-map /mnt/data1/GWAS_bloodcelltypes/All_SNPs_hg19.txt --make-bed --out Understanding_Society
+
+## MAKE A NEW COLUMN
+for f in plink.CD8T.assoc.linear; do 
+    paste $f <(yes $f | head -n $(cat $f | wc -l)) > $f.new
+done
+#Loop version
+for f in *linear; do 
+    paste $f <(yes $f | head -n $(cat $f | wc -l)) > $f.new
+done
+
+https://unix.stackexchange.com/questions/510709/replacing-matching-entries-in-one-column-of-a-file-by-another-column-from-a-diff
+awk 'NR==FNR{a[$2]=$6;next}{$10=a[$2]; print}' EUGEI_filtered_white_sexupd.bim plink.CD8T.assoc.linear.new  > plink.CD8T.assoc.linear.A22
+
+#Loop version EUGEI
+for f in *new; do 
+	awk 'NR==FNR{a[$2]=$6;next}{$10=a[$2]; print}' EUGEI_filtered_white_sexupd.bim $f  > $f.A2
+done
+
+#Loop version EXTEND
+for f in *new; do 
+	awk 'NR==FNR{a[$2]=$6;next}{$10=a[$2]; print}' EXTEND_Unrelated_EUR_QCd_sex_upd.bim $f  > $f.A2
+done
+
+#Loop version US
+for f in *new; do 
+	awk 'NR==FNR{a[$2]=$6;next}{$10=a[$2]; print}' data_filtered_1_sex_upd.bim $f  > $f.A2
+done
+
+
+#Convert the space delimited file to tab delimited
+sed 's/ /\t/g' plink.CD8T.assoc.linear.A22 > plink.CD8T.assoc.linear.A222
+#Remove old header
+sed '1d' plink.CD8T.assoc.linear.A222 > plink.CD8T.assoc.linear.A2222
+# Adding header
+{ echo -e "CHR\tSNP\tBP\tA1\tTEST\tNMISS\tBETA\tSTAT\tP\tA2"; cat plink.CD8T.assoc.linear.A2222; } > plink.CD8T.assoc.linear.A22222
+#Check column
+awk -F '|' '{print $2}' plink.CD8T.assoc.linear.A2
+
+##Try this other method
+for f in *A2; do
+	awk 'NR==1{print $1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" A2" ;next}{print}' $f > $f.A22
+done
+
+
+#Combine Chr:Bp
+#Create a duplicate column
+awk '{ print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $1}' plink.CD8T.assoc.linear.fi > plink.CD8T.assoc.linear.fi2
+awk '{print $1":"$3"\t"$11" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "$10}' plink.CD8T.assoc.linear.fi2 > plink.CD8T.assoc.linear.fi3
+
+
+##Loop for chr:bp
+for f in *A22; do
+	awk '{ print $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $1}' $f > $f.chrbp
+done
+for f in *chrbp; do
+	awk '{print $1":"$3"\t"$11" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" "$10}' $f > $f.2
+done
+
+

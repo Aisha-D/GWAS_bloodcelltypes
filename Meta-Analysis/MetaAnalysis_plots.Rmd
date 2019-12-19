@@ -1,0 +1,263 @@
+---
+title: "MetaAnalysis_Plots"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Meta-analysis was carried on three datasets Extend, EuGEI, and understanding society.METAL was used to run the meta-analysis. The script used for METAL is stored in */GWAS_bloodcelltypes/Scripts/METAL_script.txt*. The script used to clean the plink files after GWAS is stored in *GWAS_bloodcelltypes/Scripts/Adding_A2_to_plinkassoclinear_files.txt*
+
+This report visualises the manhattan plot and qqplots of each cell type
+
+##CD8T
+
+```{r cd8treadin, include = FALSE, message = F, warning = F}
+cd8t = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_CD8T_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+cd8t_n <- cd8t
+cd8t_n$ChrBp <- cd8t$MarkerName
+cd8t_n <- separate(cd8t_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+cd8t_n$Chr <- as.numeric(as.character(cd8t_n$Chr))
+cd8t_n$Bp <- as.numeric(as.character(cd8t_n$Bp))
+
+colnames(cd8t_n)[colnames(cd8t_n) == 'MarkerName'] <- 'SNP'
+colnames(cd8t_n)[colnames(cd8t_n) == 'Chr'] <- 'CHR'
+colnames(cd8t_n)[colnames(cd8t_n) == 'P.value'] <- 'P'
+colnames(cd8t_n)[colnames(cd8t_n) == 'Bp'] <- 'BP'
+```
+
+```{r cd8tplot, warning = F, message = F}
+bonfP<-0.05/nrow(cd8t_n)
+par(mfrow = c(1,2))
+
+manhattan(cd8t_n, genomewide = -log10(bonfP), main = "CD8T",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
+
+qq(cd8t_n$P, main = "CD8T")
+
+```
+
+##CD4T
+
+```{r CD4Treadin, include = FALSE, message = F, warning = F}
+CD4T = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_CD4T_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+CD4T_n <- CD4T
+CD4T_n$ChrBp <- CD4T$MarkerName
+CD4T_n <- separate(CD4T_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+CD4T_n$Chr <- as.numeric(as.character(CD4T_n$Chr))
+CD4T_n$Bp <- as.numeric(as.character(CD4T_n$Bp))
+
+colnames(CD4T_n)[colnames(CD4T_n) == 'MarkerName'] <- 'SNP'
+colnames(CD4T_n)[colnames(CD4T_n) == 'Chr'] <- 'CHR'
+colnames(CD4T_n)[colnames(CD4T_n) == 'P.value'] <- 'P'
+colnames(CD4T_n)[colnames(CD4T_n) == 'Bp'] <- 'BP'
+```
+
+```{r CD4Tplots, warning = F, message = F}
+bonfP<-0.05/nrow(CD4T_n)
+par(mfrow = c(1,2))
+
+manhattan(CD4T_n, genomewide = -log10(bonfP), main = "CD4T",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
+
+qq(CD4T_n$P, main = "CD4T")
+
+```
+##Bcell
+
+```{r Bcellreadin, include = FALSE, message = F, warning = F}
+Bcell = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Bcell_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+Bcell_n <- Bcell
+Bcell_n$ChrBp <- Bcell$MarkerName
+Bcell_n <- separate(Bcell_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+Bcell_n$Chr <- as.numeric(as.character(Bcell_n$Chr))
+Bcell_n$Bp <- as.numeric(as.character(Bcell_n$Bp))
+
+colnames(Bcell_n)[colnames(Bcell_n) == 'MarkerName'] <- 'SNP'
+colnames(Bcell_n)[colnames(Bcell_n) == 'Chr'] <- 'CHR'
+colnames(Bcell_n)[colnames(Bcell_n) == 'P.value'] <- 'P'
+colnames(Bcell_n)[colnames(Bcell_n) == 'Bp'] <- 'BP'
+```
+
+```{r Bcellplot, warning = F, message = F}
+bonfP<-0.05/nrow(Bcell_n)
+par(mfrow = c(1,2))
+
+manhattan(Bcell_n, genomewide = -log10(bonfP), main = "Bcell",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
+
+qq(Bcell_n$P, main = "Bcell")
+
+```
+##NK
+
+```{r NKreadin, include = FALSE, message = F, warning = F}
+NK = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_NK_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+NK_n <- NK
+NK_n$ChrBp <- NK$MarkerName
+NK_n <- separate(NK_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+NK_n$Chr <- as.numeric(as.character(NK_n$Chr))
+NK_n$Bp <- as.numeric(as.character(NK_n$Bp))
+
+colnames(NK_n)[colnames(NK_n) == 'MarkerName'] <- 'SNP'
+colnames(NK_n)[colnames(NK_n) == 'Chr'] <- 'CHR'
+colnames(NK_n)[colnames(NK_n) == 'P.value'] <- 'P'
+colnames(NK_n)[colnames(NK_n) == 'Bp'] <- 'BP'
+```
+
+```{r NKplot, warning = F, message = F}
+bonfP<-0.05/nrow(NK_n)
+par(mfrow = c(1,2))
+
+manhattan(NK_n, genomewide = -log10(bonfP), main = "NK",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
+
+qq(NK_n$P, main = "NK")
+
+```
+##Neu
+
+```{r Neureadin, include = FALSE, message = F, warning = F}
+
+Neu <- read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Neu_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+Neu_n <- Neu
+Neu_n$ChrBp <- Neu$MarkerName
+Neu_n <- separate(Neu_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+Neu_n$Chr <- as.numeric(as.character(Neu_n$Chr))
+Neu_n$Bp <- as.numeric(as.character(Neu_n$Bp))
+
+colnames(Neu_n)[colnames(Neu_n) == 'MarkerName'] <- 'SNP'
+colnames(Neu_n)[colnames(Neu_n) == 'Chr'] <- 'CHR'
+colnames(Neu_n)[colnames(Neu_n) == 'P.value'] <- 'P'
+colnames(Neu_n)[colnames(Neu_n) == 'Bp'] <- 'BP'
+```
+
+```{r Neuplot, warning = F, message = F}
+bonfP<-0.05/nrow(Neu_n)
+par(mfrow = c(1,2))
+
+manhattan(Neu_n, genomewide = -log10(bonfP), main = "Neu",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
+
+qq(Neu_n$P, main = "Neu")
+
+```
+
+
+##Gran
+
+```{r Granreadin, include = FALSE, message = F, warning = F}
+Gran = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Gran_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+Gran_n <- Gran
+Gran_n$ChrBp <- Gran$MarkerName
+Gran_n <- separate(Gran_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+Gran_n$Chr <- as.numeric(as.character(Gran_n$Chr))
+Gran_n$Bp <- as.numeric(as.character(Gran_n$Bp))
+
+colnames(Gran_n)[colnames(Gran_n) == 'MarkerName'] <- 'SNP'
+colnames(Gran_n)[colnames(Gran_n) == 'Chr'] <- 'CHR'
+colnames(Gran_n)[colnames(Gran_n) == 'P.value'] <- 'P'
+colnames(Gran_n)[colnames(Gran_n) == 'Bp'] <- 'BP'
+```
+
+```{r Granplot, warning = F, message = F}
+bonfP<-0.05/nrow(Gran_n)
+par(mfrow = c(1,2))
+
+manhattan(Gran_n, genomewide = -log10(bonfP), main = "Gran",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
+
+qq(Gran_n$P, main = "Gran")
+
+```
+
+
+##Eos
+
+```{r Eosreadin, include = FALSE, message = F, warning = F}
+Eos = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Eos_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+Eos_n <- Eos
+Eos_n$ChrBp <- Eos$MarkerName
+Eos_n <- separate(Eos_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+Eos_n$Chr <- as.numeric(as.character(Eos_n$Chr))
+Eos_n$Bp <- as.numeric(as.character(Eos_n$Bp))
+
+colnames(Eos_n)[colnames(Eos_n) == 'MarkerName'] <- 'SNP'
+colnames(Eos_n)[colnames(Eos_n) == 'Chr'] <- 'CHR'
+colnames(Eos_n)[colnames(Eos_n) == 'P.value'] <- 'P'
+colnames(Eos_n)[colnames(Eos_n) == 'Bp'] <- 'BP'
+```
+
+```{r Eosplot, warning = F, message = F}
+bonfP<-0.05/nrow(Eos_n)
+par(mfrow = c(1,2))
+
+manhattan(Eos_n, genomewide = -log10(bonfP), main = "Eos",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
+
+qq(Eos_n$P, main = "Eos")
+
+```
+
+
+##Mono
+
+```{r Monoreadin, include = FALSE, message = F, warning = F}
+Mono = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Mono_1.txt",
+                  stringsAsFactors = F, header = T)
+
+library(qqman)
+library(tidyr)
+Mono_n <- Mono
+Mono_n$ChrBp <- Mono$MarkerName
+Mono_n <- separate(Mono_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
+Mono_n$Chr <- as.numeric(as.character(Mono_n$Chr))
+Mono_n$Bp <- as.numeric(as.character(Mono_n$Bp))
+
+colnames(Mono_n)[colnames(Mono_n) == 'MarkerName'] <- 'SNP'
+colnames(Mono_n)[colnames(Mono_n) == 'Chr'] <- 'CHR'
+colnames(Mono_n)[colnames(Mono_n) == 'P.value'] <- 'P'
+colnames(Mono_n)[colnames(Mono_n) == 'Bp'] <- 'BP'
+```
+
+```{r Monoplot, warning = F, message = F}
+bonfP<-0.05/nrow(Mono_n)
+
+par(mfrow = c(1,2))
+manhattan(Mono_n, genomewide = -log10(bonfP), main = "Mono",
+          suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow"))
+
+qq(Mono_n$P, main = "Mono")
+
+```
