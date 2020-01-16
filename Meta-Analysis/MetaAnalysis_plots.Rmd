@@ -16,13 +16,14 @@ This report visualises the manhattan plot and qqplots of each cell type
 ##CD8T
 
 ```{r cd8treadin, include = FALSE, message = F, warning = F}
-cd8t = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_CD8T_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+cd8t = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWCD8T_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-cd8t_n <- cd8t
-cd8t_n$ChrBp <- cd8t$MarkerName
+cd8t_n <- cd8t[which(cd8t$Direction %in% c(pos,neg)),]
+cd8t_n$ChrBp <- cd8t_n$MarkerName
 cd8t_n <- separate(cd8t_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 cd8t_n$Chr <- as.numeric(as.character(cd8t_n$Chr))
 cd8t_n$Bp <- as.numeric(as.character(cd8t_n$Bp))
@@ -47,13 +48,14 @@ qq(cd8t_n$P, main = "CD8T")
 ##CD4T
 
 ```{r CD4Treadin, include = FALSE, message = F, warning = F}
-CD4T = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_CD4T_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+CD4T = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWCD4T_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-CD4T_n <- CD4T
-CD4T_n$ChrBp <- CD4T$MarkerName
+CD4T_n <- CD4T[which(CD4T$Direction %in% c(pos,neg)),]
+CD4T_n$ChrBp <- CD4T_n$MarkerName
 CD4T_n <- separate(CD4T_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 CD4T_n$Chr <- as.numeric(as.character(CD4T_n$Chr))
 CD4T_n$Bp <- as.numeric(as.character(CD4T_n$Bp))
@@ -77,13 +79,14 @@ qq(CD4T_n$P, main = "CD4T")
 ##Bcell
 
 ```{r Bcellreadin, include = FALSE, message = F, warning = F}
-Bcell = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Bcell_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+Bcell = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWBcell_1.txt",stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-Bcell_n <- Bcell
-Bcell_n$ChrBp <- Bcell$MarkerName
+Bcell_n <- Bcell[which(Bcell$Direction %in% c(pos,neg)),]
+Bcell_n$ChrBp <- Bcell_n$MarkerName
 Bcell_n <- separate(Bcell_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 Bcell_n$Chr <- as.numeric(as.character(Bcell_n$Chr))
 Bcell_n$Bp <- as.numeric(as.character(Bcell_n$Bp))
@@ -107,13 +110,14 @@ qq(Bcell_n$P, main = "Bcell")
 ##NK
 
 ```{r NKreadin, include = FALSE, message = F, warning = F}
-NK = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_NK_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+NK = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWNK_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-NK_n <- NK
-NK_n$ChrBp <- NK$MarkerName
+NK_n <- NK[which(NK$Direction %in% c(pos,neg)),]
+NK_n$ChrBp <- NK_n$MarkerName
 NK_n <- separate(NK_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 NK_n$Chr <- as.numeric(as.character(NK_n$Chr))
 NK_n$Bp <- as.numeric(as.character(NK_n$Bp))
@@ -137,14 +141,14 @@ qq(NK_n$P, main = "NK")
 ##Neu
 
 ```{r Neureadin, include = FALSE, message = F, warning = F}
-
-Neu <- read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Neu_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+Neu <- read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWNeu_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-Neu_n <- Neu
-Neu_n$ChrBp <- Neu$MarkerName
+Neu_n <- Neu[which(Neu$Direction %in% c(pos,neg)),]
+Neu_n$ChrBp <- Neu_n$MarkerName
 Neu_n <- separate(Neu_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 Neu_n$Chr <- as.numeric(as.character(Neu_n$Chr))
 Neu_n$Bp <- as.numeric(as.character(Neu_n$Bp))
@@ -170,13 +174,14 @@ qq(Neu_n$P, main = "Neu")
 ##Gran
 
 ```{r Granreadin, include = FALSE, message = F, warning = F}
-Gran = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Gran_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+Gran = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWGran_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-Gran_n <- Gran
-Gran_n$ChrBp <- Gran$MarkerName
+Gran_n <- Gran[which(Gran$Direction %in% c(pos,neg)),]
+Gran_n$ChrBp <- Gran_n$MarkerName
 Gran_n <- separate(Gran_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 Gran_n$Chr <- as.numeric(as.character(Gran_n$Chr))
 Gran_n$Bp <- as.numeric(as.character(Gran_n$Bp))
@@ -202,13 +207,14 @@ qq(Gran_n$P, main = "Gran")
 ##Eos
 
 ```{r Eosreadin, include = FALSE, message = F, warning = F}
-Eos = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Eos_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+Eos = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWEOS_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-Eos_n <- Eos
-Eos_n$ChrBp <- Eos$MarkerName
+Eos_n <- Eos[which(Eos$Direction %in% c(pos,neg)),]
+Eos_n$ChrBp <- Eos_n$MarkerName
 Eos_n <- separate(Eos_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 Eos_n$Chr <- as.numeric(as.character(Eos_n$Chr))
 Eos_n$Bp <- as.numeric(as.character(Eos_n$Bp))
@@ -234,13 +240,14 @@ qq(Eos_n$P, main = "Eos")
 ##Mono
 
 ```{r Monoreadin, include = FALSE, message = F, warning = F}
-Mono = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis/METAANALYSIS_Mono_1.txt",
-                  stringsAsFactors = F, header = T)
+pos = '+++'
+neg = '---'
+Mono = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWMono_1.txt",stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-Mono_n <- Mono
-Mono_n$ChrBp <- Mono$MarkerName
+Mono_n <- Mono[which(Mono$Direction %in% c(pos,neg)),]
+Mono_n$ChrBp <- Mono_n$MarkerName
 Mono_n <- separate(Mono_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 Mono_n$Chr <- as.numeric(as.character(Mono_n$Chr))
 Mono_n$Bp <- as.numeric(as.character(Mono_n$Bp))

@@ -30,7 +30,7 @@ library(tidyr)
 #### Methylation QC
 ####################
 #This was conducted by gemma and script is located "/mnt/data1/EXTEND/Methylation/QC/EXTEND_batch1_2_merged/merging_EXTEND_1_2_passed_samples_withGeno.Rmd"
-load("/mnt/data1/EXTEND/Methylation/QC/EXTEND_batch1_2_merged/EXTEND_batch1_2_genoQCd_Normalised.rdat")
+load("/mnt/data1/EXTEND/Methylation/QC/EXTEND_batch1_2_merged/EUR_unlrelated_QCd/EXTEND_batch1_2_genoQCd_Normalised.rdat")
 # No RGSET was found
 # ! CREATE RGSET FROM ORGININAl --- HOWEVER SAMPLES ONLY CONTAIN PASSED! Run This chink once
 # Batch1
@@ -81,13 +81,30 @@ load("/mnt/data1/EXTEND/Methylation/QC/EXTEND_batch1_2_merged/EXTEND_batch1_2_ge
 # mset <- combo(mset_batch1, mset_batch2)
 # save(mset, file="EXTEND_mset.rdat")
 
-load("EXTEND_CellCounts.rdat") #this was done in the 'resolving_est_celltype.R'
-pcs <- read.table("/mnt/data1/EXTEND/GWAS_bloodcelltypes/EXTEND_Unrelated_EUR_QCd.pca.eigenvec", stringsAsFactors = F, header = T)
+# load("EXTEND_CellCounts.rdat") #this was done in the 'resolving_est_celltype.R'
+pcs <- read.table("/mnt/data1/GWAS_bloodcelltypes/EXTEND/EXTEND_Unrelated_EUR_QCd.pca.eigenvec", stringsAsFactors = F, header = T)
+# 
+# Cellcounts <- cbind(pheno$Age, pheno$Sex)
+# cell_counts <- as.data.frame(cell_counts)
+# Cellcounts <- cbind(Cellcounts, cell_counts)
 
-Cellcounts <- cbind(pheno$Age, pheno$Sex)
-cell_counts <- as.data.frame(cell_counts)
-Cellcounts <- cbind(Cellcounts, cell_counts)
+#Use the probes for estimate cell counts than
+#Cell counts
+source("/mnt/data1/reference_files/BloodCellPropCalc/cellpropfunctions.r") #loads functions
+load('/mnt/data1/reference_files/BloodCellPropCalc/Bloodcoefs_withNeu.rdat') #loads the bloodcoefs to calculate cell proportion
+library(genefilter)
+library(quadprog)
+library(matrixStats)
 
+#here we only use the probes required to estiamte cell counts
+coefs2 <- coefs[rownames(coefs) %in% rownames(betas),]
+betas2 <- betas[rownames(coefs2),]
+counts <- projectCellType(Y = betas2, coefCellType = coefs2)
+rownames(counts) <- colnames(betas2)
+save(counts, file = '/mnt/data1/GWAS_bloodcelltypes/EXTEND/cell_counts.rdat')
+boxplot(counts, las = 2)
+
+Cellcounts <- counts
 #give pcs basename rownames
 IID <- pheno$IID[match(pheno$Basename, rownames(Cellcounts))]
 #rownames(Cellcounts) <- IID
@@ -99,19 +116,23 @@ pathM <- paste('/mnt/data1/EXTEND/Genotypes/Imputed/EXTEND_Unrelated_EUR_QCd', c
 SNP_M <- read.plink(pathM[1], pathM[2], pathM[3])
 fam <- SNP_M$fam
 
-cov2 <- cbind(Cellcounts, pcs[match(Cellcounts$IID, pcs$X10K06515PH),3:12])
-cov2 <- cbind(fam[match(cov2$IID, fam$pedigree),1:2], cov2)
-cov2 <- cov2[ , -which(names(cov2) %in% c("IID"))]
-colnames(cov2)<-c("FID","IID", "Age", "Sex", "CD8T","CD4T", "NK",
-                 "Bcell","Mono","Gran",
-                 "Eos", "Neu", paste("PC", 1:10, sep = ""))
+#Add Age and Sex to CellCounts
+rownames(pheno) <- pheno$Basename
+Cellcounts2 <- cbind(Cellcounts, pheno[match(rownames(counts),rownames(pheno)), c('Age', 'Sex')] )
+
+cov2 <- cbind(Cellcounts2, pcs[match(Cellcounts2$IID, pcs$X10K06515PH),3:12]) #merge first 10PCs from pcs file
+cov2 <- cbind(fam[match(cov2$IID, fam$pedigree),1:2], cov2) #merge the IID and FID to covariates table 
+cov2 <- cov2[ , -which(names(cov2) %in% c("IID"))] #remove column IID as its redundant
+colnames(cov2)<-c("FID","IID", "CD8T","CD4T", "NK", "Bcell",
+                  "Mono","Gran","Eos", "Neu", "Age", "Sex",
+                  paste("PC", 1:10, sep = ""))
 cov2$Age <- as.numeric(as.character(cov2$Age))
 cov2$Sex <- as.character(cov2$Sex)
 cov2$Sex[cov2$Sex == 'Female'] <- 2
 cov2$Sex[cov2$Sex == 'Male'] <- 1
 cov2$Sex <- as.numeric(cov2$Sex)-1
 cov2 <- cov2[!(is.na(cov2$FID)),]
-write.table(cov2, 'covariates.txt',sep = "\t", quote = FALSE, row.names = F)
+write.table(cov2, 'covariates_upd.txt',sep = "\t", quote = FALSE, row.names = F)
 ex_sex <- cov2[,c(1,2,4)]
 ex_sex$Sex <- as.numeric(ex_sex$Sex)+1
 ex_sex$Sex[is.na(ex_sex$Sex)] <- 0
