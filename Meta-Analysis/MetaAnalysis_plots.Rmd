@@ -209,7 +209,7 @@ qq(Gran_n$P, main = "Gran")
 ```{r Eosreadin, include = FALSE, message = F, warning = F}
 pos = '+++'
 neg = '---'
-Eos = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWEOS_1.txt", stringsAsFactors = F, header = T)
+Eos = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWEos_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
