@@ -1,0 +1,7 @@
+GWAS_per_study
+
+This is the first part of the gwas where for each study; QC is carried out, Gwas is ran (using plink), followed by data formatting to allow meta-analysis to be run
+
+Meta-Analysis
+
+This is the second part of the study where meta-analysis is carried out by metal. Other scripts to analyse the results is included.
