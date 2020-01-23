@@ -55,22 +55,29 @@ coords <- apply(cd8t3, 1, paste, collapse = ":")
 coords3 <- apply(coords, 1, paste, collapse = ":")
 coords2 <- as.vector(coords)
 snp_mart = useMart(biomart="ENSEMBL_MART_SNP", 
-                   host="grch37.ensembl.org", 
-                   path="/biomart/martservice", dataset="hsapiens_snp")
+                   path="/biomart/martservice", dataset="hsapiens_snp",
+                   host="useast.ensembl.org")
 
 rsIDs_1 <- getBM(attributes = c('refsnp_id','chrom_start','chrom_strand','allele'),
-              filters = c("chr_name","start","end"), values = list(cd8t3$Chr, cd8t3$start, cd8t3$end), mart = snp_mart)
+              filters = c("chr_name","start","end"), 
+              values = list(as.numeric(cd8t3$Chr), 
+                            as.numeric(cd8t3$start), 
+                            as.numeric(cd8t3$end)), 
+              mart = snp_mart)
 
 rsIDs$ChrBp <- paste(rsIDs$chrom_strand, rsIDs$chrom_start, sep = ":")
 cd8t3$ChrBp <- paste(cd8t3$Chr, cd8t3$start, sep = ":")
 
 
 ## loop to get every snp on the choromsome
-coords4 = cd8t3$ChrBpstr
+coords4 = as.character(cd8t3$ChrBpstr)
 names(coords4) <- 1:nrow(cd8t3)
+coords5 <- coords4[1:3]
+coords6 <- as.numeric(as.character(list(coords5)))
+
 rsIDs_2 <- getBM(attributes = c('refsnp_id','allele','chrom_start','chrom_strand'), 
                    filters = c('chromosomal_region'), 
-                   values = coords4,
+                   values = list(coords4),
                    mart = snp_mart)
 
 
@@ -82,9 +89,10 @@ listDatasets(variation)
 variation = useEnsembl(biomart="snp", dataset="hsapiens_snp")
 listFilters(variation)
 listAttributes(variation)
-rsIDs_2 <- getBM(attributes = c('refsnp_id','allele','chrom_start','chrom_strand'), 
+
+rsIDs_2 <- getBM(attributes = c('refsnp_id','allele','chrom_start', 'chrom_end', 'chrom_strand'), 
                  filters = c('chromosomal_region'), 
-                 values = coords4,
+                 values = list(cd8t4$Chr, cd8t4$start, cd8t4$end),
                  mart = variation)
 
 
@@ -93,8 +101,19 @@ rsIDs_2 <- getBM(attributes = c('refsnp_id','allele','chrom_start','chrom_strand
 ensembl <- useMart("ensembl")
 listMarts(ensembl)
 
-
-
+##Another way:https://www.biostars.org/p/323319/
+cd8t4 <- cd8t3[,1:3]
+cd8t4$Chr <- as.numeric(cd8t4$Chr)
+cd8t4$end <- as.numeric(cd8t4$end)
+cd8t4$start <- as.numeric(cd8t4$start)
+mart=useMart(biomart="ENSEMBL_MART_SNP", host="grch37.ensembl.org", path="/biomart/martservice", dataset="hsapiens_snp")
+tmp = do.call(rbind,(apply(cd8t4,1, function (x) getBM(attributes = c('refsnp_id','chrom_start','chrom_end', 'chrom_strand','allele'), 
+                                                  filters = c('chr_name','start','end'), 
+                                                  values = as.list(x), mart = mart))))
 ### Ensembl didn't work so lets us the UCSC outputs instead
-track = read.table("/mnt/data1/reference_files/hg38/All_SNPS_151/All_SNPs_hg19.txt",
-                   stringsAsFactors = F, header = T)
+cd8t2$alle <- paste(cd8t2$Allele1, cd8t2$Allele2, sep = "/")
+cd8tv <- cd8t2[,which(names(cd8t2) %in% c("Chr", "Bp", "Bp", "alle"))]
+cd8tv$Bp2 = cd8tv$Bp
+cd8tv <- cd8tv[,c("Chr", "Bp", "Bp2", "alle")]
+cd8tv2 <- cd8tv[1:25,]
+write.table(cd8tv2, "CD8T_topsig.txt",row.names = F, sep = "\t", quote = FALSE)
