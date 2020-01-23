@@ -46,10 +46,16 @@ plink2 --bfile EXTEND_EuGEI_UnderSoc --bmerge 1000G_gr38 --maf 0.2 --geno 0.05 -
 plink2 --bfile AllCohort_Merged1KG --indep 50 5 1.5 --out AllCohort_Merged1KG.ld
 plink2 --bfile AllCohort_Merged1KG --extract AllCohort_Merged1KG.ld.prune.in --make-bed --out AllCohort_Merged1KG.ld.prune
 
-
 # use GCTA to calc PCs
 /mnt/data1/programs/gcta_v24_installation/gcta64 --bfile AllCohort_Merged1KG.ld.prune --make-grm-bin --autosome --out AllCohort_Merged1KG
 /mnt/data1/programs/gcta_v24_installation/gcta64 --grm AllCohort_Merged1KG --pca --out AllCohort_Merged1KG.pca
 
 
+#PCA for 3 cohorts only
+# LD prune
+plink2 --bfile EXTEND_EuGEI_UnderSoc --indep 50 5 1.5 --out EXTEND_EuGEI_UnderSoc.ld
+plink2 --bfile EXTEND_EuGEI_UnderSoc --extract EXTEND_EuGEI_UnderSoc.ld.prune.in --make-bed --out EXTEND_EuGEI_UnderSoc.ld.prune
 
+# use GCTA to calc PCs
+/mnt/data1/programs/gcta_v24_installation/gcta64 --bfile EXTEND_EuGEI_UnderSoc.ld.prune --make-grm-bin --autosome --out EXTEND_EuGEI_UnderSoc
+/mnt/data1/programs/gcta_v24_installation/gcta64 --grm EXTEND_EuGEI_UnderSoc --pca --out EXTEND_EuGEI_UnderSoc.pca
