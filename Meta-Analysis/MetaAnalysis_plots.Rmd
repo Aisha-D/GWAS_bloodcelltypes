@@ -11,18 +11,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Meta-analysis was carried on three datasets Extend, EuGEI, and understanding society.METAL was used to run the meta-analysis. The script used for METAL is stored in */GWAS_bloodcelltypes/Scripts/METAL_script.txt*. The script used to clean the plink files after GWAS is stored in *GWAS_bloodcelltypes/Scripts/Adding_A2_to_plinkassoclinear_files.txt*
 
-This report visualises the manhattan plot and qqplots of each cell type
+This report visualises the manhattan plot and qqplots of each cell type.
 
 ##CD8T
 
 ```{r cd8treadin, include = FALSE, message = F, warning = F}
 pos = '+++'
 neg = '---'
-cd8t = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/METAANALYSIS_IVWCD8T_1.txt", stringsAsFactors = F, header = T)
+cd8t = read.table("/mnt/data1/GWAS_bloodcelltypes/MetaAnalysis_IVW/Metal_Outputs/METAANALYSIS_IVWCD8T_1.txt", stringsAsFactors = F, header = T)
 
 library(qqman)
 library(tidyr)
-cd8t_n <- cd8t[which(cd8t$Direction %in% c(pos,neg)),]
+cd8t_n <- cd8t
 cd8t_n$ChrBp <- cd8t_n$MarkerName
 cd8t_n <- separate(cd8t_n, ChrBp, into= c("Chr", "Bp"), sep = ":")
 cd8t_n$Chr <- as.numeric(as.character(cd8t_n$Chr))
@@ -34,7 +34,235 @@ colnames(cd8t_n)[colnames(cd8t_n) == 'P.value'] <- 'P'
 colnames(cd8t_n)[colnames(cd8t_n) == 'Bp'] <- 'BP'
 ```
 
+
+```{r Minimanhattan plot, include = FALSE, warning = F, message = F}
+miniman <- function (data = NULL, chr = NULL, cpg = NULL, range = NULL, 
+xlim = NULL, ylim = NULL, xlab = NULL, ylab = NULL, pch = 1, main = NULL, 
+col = "black", cex = 1, result = NULL, pad = 30000, multiply = NULL, 
+nullcol = "black", negcol = "black", poscol = "black", ESlevel = 0, ESdat = NULL, 
+cexgene = 0.5, geneplot = TRUE, genelines = NULL, chrcol = NULL, 
+mapcol = NULL, cpgcol = "forestgreen", cex.axis = 1, cex.lab = 1) {
+
+# data should just be a dataframe
+# chrcol and mapcol will automatically use 'CHR' and 'MAPINFO' but can be 
+# replaced. chrcol column should just be numeric
+# Can either provide a chr and range or cpg (must be rowname and have 
+# mapinfo and chr in the file)
+# result is the column who's p-values you want to plot
+# pad is amount of padding to add ot the coordinates given
+# cexgene is text size for labelling genes
+# geneplot will be added by default but can be stopped if = "FALSE"
+# genelines will autimatically be calculated by number of transcripts but 
+# can be adjusted. If more transtcripts than genelines, several will be plotted 
+# on the same line
+# ESdat is the effect size column to colour points by
+# ESlevel is target effect size to colour by
+# nullcol is colour to plot if data doesn't meet ESlevel
+# negcol is colour to plot if data meets -ESlevel 
+# poscol is colour to plot if data meets +ESlevel 
+# cpgcol is colour for cpg island track
+
+require(TxDb.Hsapiens.UCSC.hg19.knownGene)
+require(Homo.sapiens)
+require(AnnotationHub)
+
+if(missing(data))        {
+stop("please provide data")
+                }	
+
+if(is.null(xlab)) {
+	xlab = "Genomic Position"
+	}
+
+if(is.null(ylab)) {
+	ylab = "-log10(p)"
+	}	
+	
+if(is.null(main)) {
+	main = ""
+	}
+
+if(is.null(chrcol)){
+    chrcol="CHR"
+    }
+    
+if(is.null(mapcol)){
+    mapcol="MAPINFO"
+    }    
+      
+if(missing(chr)) {
+                        
+if(missing(cpg)){
+
+stop("please provide either 'chr' and 'range' or 'cpg'")
+                
+                }	
+		          }
+
+if(! is.null(cpg)){
+
+	data[cpg,chrcol]->chr
+	data[cpg,mapcol]->MI
+	range = MI:MI
+	
+                  }	
+	
+if(is.null(xlim)) {
+      xlim <- c((min(range) - pad),(max(range) + pad))
+                  }
+
+if(missing(result)){
+
+stop("please provide result you would like to plot")
+                
+                   }	
+
+par(xpd=TRUE)
+
+data[which(data[,chrcol] == chr & data[,mapcol] >= min(range) - 
+pad & data[,mapcol] <= max(range) + pad),]->y
+
+if(is.null(ylim)) {
+	ylim = c(min(-log10(y[,result])),max(-log10(y[,result])))
+	}
+	
+if(is.null(chr)) {
+	chr = y[,chrcol]
+	}
+	
+if(is.null(cexgene)) {
+	cexgene = 0.5
+	}
+	
+if(is.null(geneplot)) {
+	geneplot = TRUE
+	}
+
+ESlevel <- ESlevel/multiply
+
+if(geneplot == "TRUE"){
+layout(matrix(c(1,2), 2, 1, byrow = TRUE))
+par(mar=c(3,3,1,2)+ 0.1, mgp=c(2,1,0)) 
+
+if(!is.null(ESdat)){
+
+plot(-log10(y[which(y[,ESdat] > -ESlevel & y[,ESdat] < ESlevel),result])~
+y[which(y[,ESdat] > -ESlevel & y[,ESdat] < ESlevel),mapcol], xlim = xlim, 
+ylim = ylim, cex = cex, pch = pch, xlab = xlab, ylab = ylab , xpd=FALSE, 
+col=nullcol, cex.axis = cex.axis, cex.lab = cex.lab)
+points(-log10(y[which(y[,ESdat] >= ESlevel),result])~
+y[which(y[,ESdat] >= ESlevel),mapcol], col=poscol, cex = cex)
+points(-log10(y[which(y[,ESdat] <= -ESlevel),result])~
+y[which(y[,ESdat] <= -ESlevel),mapcol], col=negcol, cex = cex)
+                   }
+
+else{
+
+plot(-log10(y[,result])~y[,mapcol], xlim = xlim, ylim = ylim, cex = cex, 
+pch = pch, xlab = xlab, ylab = ylab , xpd=FALSE, col=nullcol)
+
+     }
+
+chr2=paste("chr", chr, sep="")
+
+hub <- AnnotationHub()
+query(hub, c("cpg","hg19"))
+cpgs <- as.data.frame(hub[["AH5086"]])
+cpgs[which(cpgs$seqnames == chr2 & cpgs$start >=min(range)-pad & 
+cpgs$start <= max(range)+pad),]->cpg
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+
+gr <- GRanges(seqnames = chr2, ranges = IRanges(start = min(range)-pad, 
+end = max(range)+pad))
+
+subsetByOverlaps(transcripts(txdb), gr)->trans
+
+res <- as.data.frame(transcripts(Homo.sapiens, columns=c("TXNAME","SYMBOL")))
+as.data.frame(res[res$TXNAME %in% as.data.frame(trans)[,"tx_name"],"SYMBOL"])->m
+colnames(m)<-"SYMBOL"
+cbind(trans,m)->trans
+trans[is.na(trans$SYMBOL) == "FALSE",]->trans
+
+if(is.null(genelines)){
+	genelines = nrow(trans)
+	                  }
+
+rep(1:max(genelines), times=ceiling(nrow(trans)/max(genelines)))->gl
+gl[1:nrow(trans)]->gl
+trans$gl <- gl
+	
+subsetByOverlaps(exonsBy(txdb, by = "tx"), gr)->exons
+exons[rownames(trans)]->exons
+
+par(mar=c(1,3,1,2)+ 0.1) 
+plot(0,0,type="n", xlim=xlim, ylim=c(0,genelines +1), axes=FALSE, xlab="", 
+ylab="", xpd=FALSE)
+
+for(g in 1:nrow(cpg)){
+polygon(c(cpg[g, "start"], cpg[g, "end"], cpg[g, "end"], cpg[g, "start"]), 
+c((genelines+1)-0.2, (genelines+1)-0.2, (genelines+1)+0.2,(genelines+1)+0.2),
+col=cpgcol, xpd=FALSE, border=cpgcol)
+                     }
+
+for(i in 1:nrow(trans)){
+
+lines(c(as.data.frame(trans)[i,"start"], as.data.frame(trans)[i,"end"]), 
+c(trans$gl[i],trans$gl[i]), xpd=FALSE)
+text(as.data.frame(trans)[i,"start"]+((as.data.frame(trans)[i,"end"] - 
+as.data.frame(trans)[i,"start"])/2) ,trans$gl[i] + 0.4 , trans$SYMBOL[i], 
+cex=cexgene, xpd=FALSE)
+
+for(x in 1:nrow(as.data.frame(exons[[i]]))){
+
+polygon(c(as.data.frame(exons[[i]])[x,"start"], 
+as.data.frame(exons[[i]])[x,"end"], as.data.frame(exons[[i]])[x,"end"], 
+as.data.frame(exons[[i]])[x,"start"]), 
+c(trans$gl[i]-0.2, trans$gl[i]-0.2, trans$gl[i]+0.2,trans$gl[i]+0.2),
+col="black", xpd=FALSE)
+
+
+                                           }
+                      }
+                      }
+ 
+if(geneplot == "FALSE"){
+plot.new()
+if(!is.null(ESdat)){
+par(mar=c(3,3,1,2)+ 0.1, mgp=c(2,1,0)) 
+
+plot(-log10(y[which(y[,ESdat] > -ESlevel & y[,ESdat] < ESlevel),result])~
+y[which(y[,ESdat] > -ESlevel & y[,ESdat] < ESlevel),mapcol], xlim = xlim, 
+ylim = ylim, cex = cex, pch = pch, xlab = xlab, ylab = ylab , xpd=FALSE, 
+col=nullcol, cex.axis = cex.axis, cex.lab = cex.lab)
+points(-log10(y[which(y[,ESdat] >= ESlevel),result])~
+y[which(y[,ESdat] >= ESlevel),mapcol], col=poscol, cex = cex)
+points(-log10(y[which(y[,ESdat] <= -ESlevel),result])~
+y[which(y[,ESdat] <= -ESlevel),mapcol], col=negcol, cex = cex)
+
+                   }
+
+else{
+
+plot(-log10(y[,result])~y[,mapcol], xlim = xlim, ylim = ylim, cex = cex, 
+pch = pch, xlab = xlab, ylab = ylab , xpd=FALSE, col=nullcol, cex.axis = cex.axis, 
+cex.lab = cex.lab)
+
+     }
+
+                        }
+                                                                }
+
+```
+
+
+
+
 ```{r cd8tplot, warning = F, message = F}
+pos = '+++'
+neg = '---'
+
+cd8t_n <- cd8t_n[which(cd8t_n$Direction %in% c(pos,neg)),]
+
 bonfP<-0.05/nrow(cd8t_n)
 par(mfrow = c(1,2))
 
@@ -42,6 +270,22 @@ manhattan(cd8t_n, genomewide = -log10(bonfP), main = "CD8T",
           suggestiveline = -log10(5e-5), logp=T, col=c("blue","yellow") )
 
 qq(cd8t_n$P, main = "CD8T")
+
+```
+
+We can zoom in to see the most significant probe.
+
+```{r cd8t minimanhattan, warning = F, message = F}
+
+cd8t_n <- cd8t_n[order(cd8t_n$P),]
+sig_cd8t <- cd8t_n[1,]
+manhattan(subset(cd8t_n, CHR == sig_cd8t$CHR), highlight = cd8t_n[cd8t_n$P >= bonfP, 'SNP'],suggestiveline = -log10(5e-5), genomewide = -log10(bonfP), xlim = c((sig_cd8t$BP - 10000), (sig_cd8t$BP + 10000)), main = sig_cd8t$CHR)
+
+```
+
+What is the PM plot like for this cell type variant?
+
+```{r cd8t annotation, warning = F, message = F}
 
 ```
 
