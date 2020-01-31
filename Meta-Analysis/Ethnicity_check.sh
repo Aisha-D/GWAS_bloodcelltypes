@@ -51,7 +51,7 @@ plink2 --bfile AllCohort_Merged1KG --extract AllCohort_Merged1KG.ld.prune.in --m
 /mnt/data1/programs/gcta_v24_installation/gcta64 --grm AllCohort_Merged1KG --pca --out AllCohort_Merged1KG.pca
 
 
-#PCA for 3 cohorts only
+###############################     PCA for 3 cohorts only      #######################
 # LD prune
 plink2 --bfile EXTEND_EuGEI_UnderSoc --indep 50 5 1.5 --out EXTEND_EuGEI_UnderSoc.ld
 plink2 --bfile EXTEND_EuGEI_UnderSoc --extract EXTEND_EuGEI_UnderSoc.ld.prune.in --make-bed --out EXTEND_EuGEI_UnderSoc.ld.prune
